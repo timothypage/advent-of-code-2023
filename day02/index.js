@@ -29,7 +29,7 @@ export function gameIsValid(line) {
   return true;
 }
 
-(async function doIt() {
+async function doIt() {
   let total = 0;
 
   const file = await open(process.argv[2]);
@@ -44,4 +44,48 @@ export function gameIsValid(line) {
   }
 
   console.log(total);
-})();
+};
+
+const colors = ["red", "green", "blue"];
+
+export function calculateMinCubes(line) {
+  let runs = line.replace(/Game \d+: /, "").split(";");
+
+  let minCubes = {
+    red: 0,
+    green: 0,
+    blue: 0
+  }
+
+  for (const run of runs) {
+    for (const color of colors) {
+      const r = new RegExp(`(?<count>\\d+) ${color}`);
+      const currentCount = run.match(r)?.groups?.count ?? 0;
+
+      minCubes[color] = Math.max(currentCount, minCubes[color]);
+    }
+  }
+
+  return minCubes;
+}
+
+export function calculatePower(line) {
+  const minCubes = calculateMinCubes(line);
+
+  return minCubes["red"] * minCubes["green"] * minCubes["blue"];
+}
+
+async function part2() {
+  let total = 0;
+
+  const file = await open(process.argv[2]);
+
+  for await (const line of file.readLines()) {
+    total += calculatePower(line);
+  }
+
+  console.log(total);
+}
+
+// doIt();
+part2();

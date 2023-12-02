@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert';
 
-import { parseGameNumberForLine, gameIsValid } from "./index.js";
+import { parseGameNumberForLine, gameIsValid, calculateMinCubes, calculatePower } from "./index.js";
 
 const game1 = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
 const game12 = "Game 12: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
@@ -26,6 +26,27 @@ describe("gameIsValid", () => {
     assert.equal(false, gameIsValid(game3));
   })
 });
+
+describe("calculateMinCubes", () => {
+  it("should calc game 1", () => {
+    const expected = {
+      red: 4,
+      green: 2,
+      blue: 6
+    };
+
+    const actual = calculateMinCubes(game1);
+
+    assert.deepEqual(expected, actual);
+  });
+});
+
+describe("calculatePower", () => {
+  it("should calc 48 for game 1", () => {
+    assert.equal(48, calculatePower(game1));
+  })
+})
+
 
 
 

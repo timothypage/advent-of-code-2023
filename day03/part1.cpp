@@ -1,106 +1,75 @@
-#include <string>
-#include <map>
 #include <iostream>
 #include <fstream>
-#include <utility>
+#include <vector>
 #include <regex>
 #include <algorithm>
+#include <utility>
 
 int main() {
-    std::ifstream input{ "input" };
-    std::string prevLine;
-    std::string line;
-    std::string nextLine;
+  auto filename = std::string("input");
 
-    int total{ 0 };
+  std::ifstream input{ filename };
 
-    std::regex matcher{ "[0-9]+" };
+  std::vector<std::string> schematic;
+  std::string line;
 
-    do {
-        if (line.length() == 0) {
-            prevLine = line;
-            line = nextLine;
+  while(std::getline(input, line)) {
+    schematic.push_back(line);
+  }
 
-            continue;
-        }
+  std::regex partNumberPattern("[0-9]+");
 
-        std::cout << line << '\n';
+  int sum = 0;
 
-        for (
-            auto it = std::sregex_iterator(line.begin(), line.end(), matcher); 
-            it != std::sregex_iterator(); 
-            it++
-        ) {
-            std::smatch match = *it;
-            std::string match_str = match.str();
+  for (size_t lineNumber = 0; lineNumber < schematic.size(); lineNumber++) {
+    // std::cout << schematic[lineNumber] << std::endl;
 
-            std::cout << std::endl;
+    line = schematic[lineNumber];
 
-            std::cout << "matched: " << match_str << " at: " << it->position() << std::endl;
+    // for each number
+    for ( auto iterator = std::sregex_iterator(line.begin(), line.end(), partNumberPattern); iterator != std::sregex_iterator(); iterator++) {
 
-            // find symbol on same line
-            if (it->position() > 0) {
-                auto chr = line.at(it->position() - 1);
-                std::cout << " before: " << chr;
-                if (chr != '.') {
-                    std::cout << std::endl << "adding " << match_str << std::endl;
-                    total += std::stoi(match_str);
-                    continue;
-                }
-            }
+      std::smatch match = *iterator;
+      std::string match_str = match.str();
 
-            if (it->position() + match_str.length() < line.length()) {
-                auto chr = line.at(it->position() + match_str.length());
-                std::cout << " after: " << chr << ' ';
-                if (chr != '.') {
-                    std::cout << std::endl << "adding " << match_str << std::endl;
-
-                    total += std::stoi(match_str);
-                    continue;
-                }
-            }
-
-            int start = std::max<int>(it->position() - 1, 0);
-            int end = std::min<int>(it->position() + match_str.length() + 1, line.length() - 1);
-            std::cout << "other line search from: " << start << " to " << end;
-
-            // find symbol on prev line
-            for (int i = start; i <= end; i++) {
-                if (prevLine.length() > 0) {
-                    auto chr = prevLine.at(i);
-
-                    if(chr != '.' && !regex_match(prevLine.substr(i, 1), matcher)) {
-                        std::cout << " found " << chr << std::endl;
-                        std::cout << std::endl << "adding " << match_str << std::endl;
-                        total += std::stoi(match_str);
-                        break;
-                    } 
-                }
-
-                if (nextLine.length() > 0) {
-                    auto chr = nextLine.at(i);
-                    if(chr != '.' && !regex_match(nextLine.substr(i, 1), matcher)) {
-                        std::cout << " found " << chr << std::endl;
-                        std::cout << std::endl << "adding " << match_str << std::endl;
-                        total += std::stoi(match_str);
-                        break;
-                    } 
-                }
-            }
-
-            std::cout << std::endl;
-
-        }
-        std::cout << std::endl;
-
-        // bookkeeping
-        prevLine = line;
-        line = nextLine;
-
-    } while( std::getline( input, nextLine ) );
+      std::string surrounding_characters = "";
 
 
-    std::cout << "total: " << total << std::endl;
+      int positionBefore = std::max<int>( iterator->position() - 1, 0);
+      int positionAfter = std::min<int>( iterator->position() + match_str.size(), line.size() - 1);
 
-    return 0;
+      auto take = positionAfter - positionBefore + 1;
+
+      // check line before
+      if (lineNumber > 0) {
+        surrounding_characters.append( schematic[lineNumber - 1].substr(positionBefore, take) );
+      }
+
+      // check char before
+      if (iterator->position() > 0) {
+        surrounding_characters.append( line.substr( positionBefore, 1 ) );
+      }
+
+      // check char after
+      if (iterator->position() + match_str.size() < line.size()) {
+        surrounding_characters.append( line.substr( positionAfter, 1 ) ) ;
+      }
+
+      // check line after
+      if (lineNumber < schematic.size() - 2) {
+        surrounding_characters.append( schematic[lineNumber + 1].substr(positionBefore, take) );
+      }
+
+      for (char& c : surrounding_characters) {
+        if ( c == '.') continue;
+
+        // std::cout << "adding " << match_str << " because " << c << std::endl;
+        sum += std::stoi(match_str); 
+        break;
+      }
+    }
+
+  }
+
+  std::cout << std::endl << "Sum: " << sum << std::endl;
 }

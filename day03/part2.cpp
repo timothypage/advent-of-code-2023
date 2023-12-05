@@ -5,11 +5,6 @@
 #include <algorithm>
 #include <utility>
 
-// TODO not handling this case
-// .........
-// ....*....
-// .123.123.
-
 int getNumber(std::string line, int pos) {
   std::string num;
 

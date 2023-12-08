@@ -33,11 +33,7 @@ int calculateCardScore(std::string line) {
   for (const auto num : cardNumbers) {
     if (!winningNumbers.contains(num)) continue;
 
-    if (cardTotal == 0) {
-        cardTotal = 1;
-    } else {
-        cardTotal *= 2;
-    }
+    cardTotal++;
   }
 
   return cardTotal;
@@ -45,23 +41,39 @@ int calculateCardScore(std::string line) {
 }
 
 int main() {
-  auto filename = std::string("example_input");
+  auto filename = std::string("input");
 
   std::ifstream input{ filename };
   std::string line;
+  int sum = 0;
 
-  int cardCounts[195] = { 0 };
+  int cardCounts[196];
+
+  std::fill_n(cardCounts, 196, 1);
 
   int* cardCountPtr = cardCounts;
 
   while (std::getline(input, line)) {
     int currentCardScore = calculateCardScore(line);
 
-    *cardCountPtr = currentCardScore;
+    std::cout << line << std::endl;
+    std::cout << "Card Score: " << currentCardScore << std::endl;
 
-    std::cout << *cardCountPtr << std::endl;
+    for (int i = 1; i <= currentCardScore; i++) {
+      // for the next "i" cards increment the total count at that index by 1 
+      // times the value of the current card being evaluated
+      //
+      //   cartCountPtr + i - pointer arithmetic to get next position in array
+      // *(cardCountPtr + i) - dereferences pointer, allowing to set the value at that position
+      *(cardCountPtr + i) += 1 * *cardCountPtr;
+    }
 
     cardCountPtr++;
-
   }
+
+  for (auto count : cardCounts) {
+    sum += count;
+  }
+
+  std::cout << "Sum: " << sum << std::endl;
 }

@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <utility>
 
-int calculateCardScore(std::string line) {
+int calculateCardScore(std::string& line) {
   std::set<int> cardNumbers{};
   std::set<int> winningNumbers{};
 
